@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -13,6 +14,7 @@ import { colors } from "@/global";
 
 export default function Pokemon() {
   const [pokemon, setPokemon] = useState<PokemonListItem[]>([]);
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -47,10 +49,24 @@ export default function Pokemon() {
     };
   }, []);
 
+  const filteredPokemon = useMemo(() => {
+    return pokemon.filter((item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [pokemon, search]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pokemon</Text>
       <Text style={styles.subtitle}>Browse the first 40 Pokemon.</Text>
+
+      <TextInput
+        placeholder="Search Pokemon..."
+        placeholderTextColor={colors.textMuted}
+        style={styles.searchInput}
+        value={search}
+        onChangeText={setSearch}
+      />
 
       {isLoading ? (
         <View style={styles.stateContainer}>
@@ -64,10 +80,17 @@ export default function Pokemon() {
       ) : (
         <FlatList
           contentContainerStyle={styles.listContent}
-          data={pokemon}
+          data={filteredPokemon}
           keyExtractor={(item) => item.name}
           renderItem={({ item }) => <PokemonCard pokemon={item} />}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.stateContainer}>
+              <Text style={styles.stateText}>
+                No Pokemon found for {search}
+              </Text>
+            </View>
+          }
         />
       )}
     </View>
@@ -90,6 +113,17 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingBottom: 24,
     paddingTop: 24,
+  },
+  searchInput: {
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "#D0D5DD",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.text,
+    backgroundColor: "#FFFFFF",
   },
   stateContainer: {
     flex: 1,
