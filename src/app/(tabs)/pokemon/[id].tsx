@@ -18,9 +18,11 @@ import {
   type PokemonDetails,
 } from "@/api/pokemon";
 import { colors } from "@/global";
+import { useFavouritesStore } from "@/store/useFavouritesStore";
 
 export default function PokemonDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { isFavourite, toggleFavourite } = useFavouritesStore();
   const [pokemon, setPokemon] = useState<PokemonDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,6 +86,14 @@ export default function PokemonDetails() {
   const imageUrl = getPokemonArtwork(pokemon);
   const heightInMeters = pokemon.height / 10;
   const weightInKilograms = pokemon.weight / 10;
+  const isFav = isFavourite(id);
+
+  const handleFavouritePress = () => {
+    toggleFavourite(
+      { name: pokemon.name, url: `https://pokeapi.co/api/v2/pokemon/${id}` },
+      id,
+    );
+  };
 
   return (
     <ScrollView
@@ -101,10 +111,20 @@ export default function PokemonDetails() {
           <View style={styles.typeRow}>
             {pokemon.types.map(({ type }) => (
               <View key={type.name} style={styles.typePill}>
-                <Text style={styles.typeText}>{formatPokemonName(type.name)}</Text>
+                <Text style={styles.typeText}>
+                  {formatPokemonName(type.name)}
+                </Text>
               </View>
             ))}
           </View>
+          <Pressable
+            onPress={handleFavouritePress}
+            style={styles.favouriteButton}
+          >
+            <Text style={[styles.heart, isFav && styles.heartActive]}>
+              {isFav ? "♥ Favourite" : "♡ Add to Favourites"}
+            </Text>
+          </Pressable>
         </View>
         <Image
           accessibilityLabel={name}
@@ -148,7 +168,9 @@ export default function PokemonDetails() {
         <View style={styles.statsList}>
           {pokemon.stats.map(({ base_stat, stat }) => (
             <View key={stat.name} style={styles.statRow}>
-              <Text style={styles.statName}>{formatPokemonName(stat.name)}</Text>
+              <Text style={styles.statName}>
+                {formatPokemonName(stat.name)}
+              </Text>
               <View style={styles.statTrack}>
                 <View
                   style={[
@@ -303,6 +325,22 @@ const styles = StyleSheet.create({
   },
   heroCopy: {
     flex: 1,
+  },
+  favouriteButton: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: colors.primarySoft,
+    alignSelf: "flex-start",
+  },
+  heart: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.textMuted,
+  },
+  heartActive: {
+    color: "#E11D48",
   },
   metricCard: {
     flex: 1,
