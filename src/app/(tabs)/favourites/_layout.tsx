@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
 
+import { stackHeaderTheme } from "@/global";
+
 export default function FavouritesLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={stackHeaderTheme}>
       <Stack.Screen
         name="index"
         options={{

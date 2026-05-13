@@ -9,10 +9,12 @@ export default function TabsLayout() {
       backgroundColor={nativeTabsTheme.backgroundColor}
       blurEffect={nativeTabsTheme.blurEffect}
       iconColor={nativeTabsTheme.iconColor}
+      indicatorColor={nativeTabsTheme.indicatorColor}
       labelStyle={{
         default: nativeTabsTheme.label,
         selected: nativeTabsTheme.selectedLabel,
       }}
+      labelVisibilityMode="labeled"
       shadowColor={nativeTabsTheme.shadowColor}
       tintColor={nativeTabsTheme.tintColor}
     >

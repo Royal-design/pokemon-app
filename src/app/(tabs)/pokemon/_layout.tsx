@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
 
+import { stackHeaderTheme } from "@/global";
+
 export default function PokemonLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={stackHeaderTheme}>
       <Stack.Screen
         name="index"
         options={{
@@ -12,6 +14,7 @@ export default function PokemonLayout() {
       <Stack.Screen
         name="[id]"
         options={{
+          presentation: "transparentModal",
           title: "Pokemon Details",
         }}
       />
