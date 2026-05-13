@@ -17,36 +17,33 @@ export default function Pokemon() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  async function loadPokemon(refresh = false) {
+    try {
+      if (refresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      const results = await fetchPokemonList();
+
+      setPokemon(results);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to load Pokemon.",
+      );
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadPokemon() {
-      try {
-        const results = await fetchPokemonList();
-
-        if (isMounted) {
-          setPokemon(results);
-          setErrorMessage(null);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error ? error.message : "Unable to load Pokemon.",
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
     loadPokemon();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const filteredPokemon = useMemo(() => {
@@ -63,9 +60,11 @@ export default function Pokemon() {
       <TextInput
         placeholder="Search Pokemon..."
         placeholderTextColor={colors.textMuted}
-        style={styles.searchInput}
+        style={[styles.searchInput, isFocused && styles.searchInputFocused]}
         value={search}
         onChangeText={setSearch}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
 
       {isLoading ? (
@@ -84,6 +83,8 @@ export default function Pokemon() {
           keyExtractor={(item) => item.name}
           renderItem={({ item }) => <PokemonCard pokemon={item} />}
           showsVerticalScrollIndicator={false}
+          refreshing={isRefreshing}
+          onRefresh={() => loadPokemon(true)}
           ListEmptyComponent={
             <View style={styles.stateContainer}>
               <Text style={styles.stateText}>
@@ -116,13 +117,19 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingVertical: 14,
     fontSize: 16,
     color: colors.text,
+    backgroundColor: "transparent",
+    borderWidth: 0,
+  },
+
+  searchInputFocused: {
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 12,
     backgroundColor: "#FFFFFF",
   },
   stateContainer: {
